@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Flask_Chat_App</title>
+</head>
+
+<body>
+  <style>
+    h2 {
+      font-family: Lobster, monospace;
+    }
+
+    p {
+      font-size: 16px;
+      font-family: monospace;
+    }
+
+    .thick-green-border {
+      border-color: green;
+      border-width: 10px;
+      border-style: solid;
+    }
+
+    .my-div-element {
+      width: 20%;
+      height: auto;
+      margin: 0 auto;
+      padding: 10px;
+      position: relative;
+    }
+
+    .loader {
+      border: 16px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 16px solid #3498db;
+      width: 120px;
+      height: 120px;
+      -webkit-animation: spin 2s linear infinite;
+      /* Safari */
+      animation: spin 1s linear infinite;
+    }
+
+    /* Safari */
+    @-webkit-keyframes spin {
+      0% {
+        -webkit-transform: rotate(0deg);
+      }
+
+      100% {
+        -webkit-transform: rotate(360deg);
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <div width="600px">
+    <div class="my-div-element  thick-green-border">
+      <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
+      <div class="message_holder"></div>
+
+      <form action="" method="POST">
+        <input type="text" class="message" placeholder="Messages" />
+        <input type="submit" />
+      </form>
+
+      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+      <script type="text/javascript">
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        socket.on('connect', function () {
+          socket.emit('user connected', {
+            data: 'User Connected'
+          })
+          var form = $('form').on('submit', function (e) {
+            e.preventDefault()
+            let user_input = $('input.message').val()
+            socket.emit('my event', {
+              message: user_input
+            })
+            $('input.message').val('').focus()
+          })
+        })
+        socket.on('my question', function (msg) {
+          console.log(msg)
+          $('h3').remove()
+          $('div.message_holder').append('<div><b style="color: #000"> Question: </b> ' + msg.message + '</div>')
+          socket.emit('bot listens', { message: msg.message })
+          $('div.message_holder').append('<div class="loader"></div>')
+        })
+        socket.on('bot replies', function (msg) {
+          console.log(msg)
+          $('h3').remove()
+          $( ".loader" ).remove()
+          $('div.message_holder').append('<div><b style="color: #000"> Answer: </b> ' + msg.message + '</div>')
+        })
+      </script>
+    </div>
+  </div>
+</body>
+
+</html>
