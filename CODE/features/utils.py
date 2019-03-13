@@ -2,6 +2,7 @@ from pickle import load
 from numpy import array
 from numpy import argmax
 from CODE.features.utils import  *
+from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 

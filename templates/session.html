@@ -18,9 +18,27 @@
 
     .thick-green-border {
       border-color: green;
-      border-width: 10px;
-      border-style: solid;
+      border-width: 4px;
+      border-style: dotted;
     }
+     .message-box-question {
+         border-radius: 15px 50px;
+         padding-right: 10px;
+         #border-color: aqua;
+         border-width: 2px;
+         border-style: solid;
+         background: powderblue;
+         text-align: right;
+     }
+    .message-box-answer {
+        paddingleft: 10px;
+        border-radius: 50px 15px;
+         #border-color: black;
+         border-width: 2px;
+         border-style: solid;
+         background: darkgrey;
+         text-align: left;
+     }
 
     .my-div-element {
       width: 20%;
@@ -31,11 +49,11 @@
     }
 
     .loader {
-      border: 16px solid #f3f3f3;
+      border: 4px solid #f3f3f3;
       border-radius: 50%;
       border-top: 16px solid #3498db;
-      width: 120px;
-      height: 120px;
+      width: 30px;
+      height: 30px;
       -webkit-animation: spin 2s linear infinite;
       /* Safari */
       animation: spin 1s linear infinite;
@@ -93,7 +111,7 @@
         socket.on('my question', function (msg) {
           console.log(msg)
           $('h3').remove()
-          $('div.message_holder').append('<div><b style="color: #000"> Question: </b> ' + msg.message + '</div>')
+          $('div.message_holder').append('<div class="message-box-question">' + msg.message + '</div>')
           socket.emit('bot listens', { message: msg.message })
           $('div.message_holder').append('<div class="loader"></div>')
         })
@@ -101,7 +119,7 @@
           console.log(msg)
           $('h3').remove()
           $( ".loader" ).remove()
-          $('div.message_holder').append('<div><b style="color: #000"> Answer: </b> ' + msg.message + '</div>')
+          $('div.message_holder').append('<div class="message-box-answer"><b style="color: #000"> A: </b> ' + msg.message + '</div>')
         })
       </script>
     </div>

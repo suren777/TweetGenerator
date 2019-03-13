@@ -30,7 +30,10 @@ def handle_question(json, methods=['GET', 'POST']):
 def handle_bot_reply(json, methods=['GET', 'POST']):
     print('received bot listens: ' + str(json))
     json['msg_username'] = 'Bot'
-    newMessage = reply_model(json['message'])
+    #newMessage = reply_model(json['message'])
+    import time
+    time.sleep(2)
+    newMessage = 'Test'
     json['message'] = newMessage
     socketio.emit('bot replies', json, callback=messageSent())
 
