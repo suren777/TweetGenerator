@@ -5,6 +5,7 @@ from unicodedata import normalize
 from numpy import array
 import  pandas as pd
 
+
 dataFolder = r"FILES/Datasets/"
 
 # load doc into memory
@@ -32,7 +33,7 @@ def clean_pairs(lines):
 	table = str.maketrans('', '', string.punctuation)
 	for pair in lines:
 		clean_pair = list()
-		for line in pair:
+		for i, line in enumerate(pair):
 			# normalize unicode characters
 			line = normalize('NFD', str(line)).encode('ascii', 'ignore')
 			line = line.decode('UTF-8')
@@ -68,4 +69,4 @@ if __name__ == '__main__':
 	save_clean_data(clean_pairs, dataFolder+'question-answer.pkl')
 	# spot check
 	for i in range(100):
-		print('[%s] => [%s]' % (clean_pairs[i,0], clean_pairs[i,1]))
+		print('[%s] => [%s]' % (clean_pairs[i,0][:MAX_QUESTION_SIZE], clean_pairs[i,1][:MAX_ANSWER_SIZE]))

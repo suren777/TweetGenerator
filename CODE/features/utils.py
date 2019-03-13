@@ -1,6 +1,7 @@
 from pickle import load
 from numpy import array
 from numpy import argmax
+import pickle
 from CODE.features.utils import  *
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.preprocessing.text import Tokenizer
@@ -12,9 +13,18 @@ def load_clean_sentences(filename):
 	return load(open(filename, 'rb'))
 
 # fit a tokenizer
-def create_tokenizer(lines):
-	tokenizer = Tokenizer()
-	tokenizer.fit_on_texts(lines)
+def get_tokenizer(dataset = None, max_vocabulary=2000, tokenizerFile='tokenizer.pkl'):
+	try:
+		with open(dataFolder+tokenizerFile) as f:
+			tokenizer = pickle.load(f)
+	except:
+		print("No tokenizer found, creating a new one")
+		if dataset:
+			tokenizer = Tokenizer(num_words=max_vocabulary)
+			tokenizer.fit_on_texts(dataset)
+		else:
+			tokenizer = None
+			print("No dataset found.")
 	return tokenizer
 
 # max sentence length

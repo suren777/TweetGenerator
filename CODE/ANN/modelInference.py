@@ -2,7 +2,7 @@ from CODE.features.utils import  *
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
 from nltk.translate.bleu_score import corpus_bleu
-
+from FILES.Config.config import *
 
 
 # encode and pad sequences
@@ -51,9 +51,8 @@ def evaluate_model(model, tokenizer, sources, raw_dataset):
 	print('BLEU-4: %f' % corpus_bleu(actual, predicted, weights=(0.25, 0.25, 0.25, 0.25)))
 
 def reply_model(source):
-	dataset = load_clean_sentences(dataFolder+'english-german-both.pkl')
-	tokenizer = create_tokenizer(dataset[:, 0])
-	encodedSequence = encode_sequences(tokenizer,  10, source)
+	tokenizer = get_tokenizer()
+	encodedSequence = encode_sequences(tokenizer,  MAX_QUESTION_SIZE, source)
 	filename = 'FILES/SavedModels/model.h5'
 	model = load_model(filename)
 	encodedSequence = encodedSequence[0].reshape((1, encodedSequence[0].shape[0]))
