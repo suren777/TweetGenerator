@@ -53,8 +53,10 @@ def evaluate_model(model, tokenizer, sources, raw_dataset):
 def reply_model(source):
 	tokenizer = get_tokenizer()
 	encodedSequence = encode_sequences(tokenizer,  MAX_QUESTION_SIZE, source)
-	filename = 'FILES/SavedModels/model.h5'
-	model = load_model(filename)
+	modelFolder = 'FILES/SavedModels/'
+	import os
+	modelFile = os.listdir(modelFolder)[-1]
+	model = load_model(modelFolder+modelFile)
 	encodedSequence = encodedSequence[0].reshape((1, encodedSequence[0].shape[0]))
 	return predict_sequence(model, tokenizer, encodedSequence)
 
@@ -67,11 +69,11 @@ if __name__ == '__main__':
 	test = load_clean_sentences(dataFolder+'english-german-test.pkl')
 
 	# prepare english tokenizer
-	eng_tokenizer = create_tokenizer(dataset[:, 0])
+	eng_tokenizer = get_tokenizer(dataset[:, 0])
 	eng_vocab_size = len(eng_tokenizer.word_index) + 1
 	eng_length = max_length(dataset[:, 0])
 	# prepare german tokenizer
-	ger_tokenizer = create_tokenizer(dataset[:, 1])
+	ger_tokenizer = get_tokenizer(dataset[:, 1])
 	ger_vocab_size = len(ger_tokenizer.word_index) + 1
 	ger_length = max_length(dataset[:, 1])
 	# prepare data

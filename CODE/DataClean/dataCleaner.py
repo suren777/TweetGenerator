@@ -69,4 +69,4 @@ if __name__ == '__main__':
 	save_clean_data(clean_pairs, dataFolder+'question-answer.pkl')
 	# spot check
 	for i in range(100):
-		print('[%s] => [%s]' % (clean_pairs[i,0][:MAX_QUESTION_SIZE], clean_pairs[i,1][:MAX_ANSWER_SIZE]))
+		print('[%s] => [%s]' % (clean_pairs[i,0][:], clean_pairs[i,1][:]))

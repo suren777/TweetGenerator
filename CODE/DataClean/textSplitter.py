@@ -17,11 +17,11 @@ rawDataset = load_clean_sentences(dataFolder+raw_data_set.format(''))
 
 # reduce dataset size
 n_sentences = 10000
-dataset = rawDataset[:n_sentences, :]
+dataset = rawDataset[:, :]
 # random shuffle
 shuffle(dataset)
 # split into train/test
-train, test = dataset[:9000], dataset[9000:]
+train, test = dataset[:-1000], dataset[-1000:]
 # save
 save_clean_data(dataset, dataFolder + raw_data_set.format('-both'))
 save_clean_data(train, dataFolder + raw_data_set.format('-train'))

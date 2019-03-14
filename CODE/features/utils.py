@@ -13,15 +13,17 @@ def load_clean_sentences(filename):
 	return load(open(filename, 'rb'))
 
 # fit a tokenizer
-def get_tokenizer(dataset = None, max_vocabulary=2000, tokenizerFile='tokenizer.pkl'):
+def get_tokenizer(dataset=None, max_vocabulary=2000, tokenizerFile='tokenizer.pkl'):
 	try:
-		with open(dataFolder+tokenizerFile) as f:
+		with open(dataFolder+tokenizerFile, 'rb') as f:
 			tokenizer = pickle.load(f)
 	except:
 		print("No tokenizer found, creating a new one")
-		if dataset:
+		if dataset is not None:
 			tokenizer = Tokenizer(num_words=max_vocabulary)
 			tokenizer.fit_on_texts(dataset)
+			with open(dataFolder + tokenizerFile, 'wb') as f:
+				pickle.dump(tokenizer, f, protocol=pickle.HIGHEST_PROTOCOL)
 		else:
 			tokenizer = None
 			print("No dataset found.")
