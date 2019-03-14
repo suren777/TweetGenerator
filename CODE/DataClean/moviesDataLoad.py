@@ -41,4 +41,4 @@ for line in questionsAnswers:
     converdations.append([lineCodes[line[0]].strip(' '), lineCodes[line[1]].strip(' ')])
 
 
-dfConversations = pd.DataFrame(data=converdations, columns=['questions', 'answers']).to_csv(folder+"DialogueFrame.csv")
+dfConversations = pd.DataFrame(data=converdations, columns=['questions', 'answers']).to_csv(folder+"DialogueFrame.csv", index=False)

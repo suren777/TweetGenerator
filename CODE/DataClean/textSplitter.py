@@ -1,28 +1,18 @@
-from pickle import dump
-from numpy.random import shuffle
-from CODE.features.utils import  load_clean_sentences
+import  pandas as pd
+from sklearn.utils import shuffle
 dataFolder = r"FILES/Datasets/"
 
-raw_data_set = r"question-answer{0}.pkl"
-
-
-# save a list of clean sentences to file
-def save_clean_data(sentences, filename):
-    dump(sentences, open(filename, 'wb'))
-    print('Saved: %s' % filename)
-
+raw_data_set = r"question-answer{0}.csv"
 
 # load dataset
-rawDataset = load_clean_sentences(dataFolder+raw_data_set.format(''))
+rawDataset = pd.read_csv(dataFolder+raw_data_set.format(''))
 
 # reduce dataset size
-n_sentences = 10000
-dataset = rawDataset[:, :]
-# random shuffle
-shuffle(dataset)
+shuffle(rawDataset)
 # split into train/test
-train, test = dataset[:-1000], dataset[-1000:]
+train, test = rawDataset[:-1000], rawDataset[-1000:]
 # save
-save_clean_data(dataset, dataFolder + raw_data_set.format('-both'))
-save_clean_data(train, dataFolder + raw_data_set.format('-train'))
-save_clean_data(test, dataFolder + raw_data_set.format('-test'))
+
+rawDataset.to_csv(dataFolder + raw_data_set.format('-both'), index=False)
+test.to_csv(dataFolder + raw_data_set.format('-test'), index=False)
+train.to_csv(dataFolder + raw_data_set.format('-train'), index=False)

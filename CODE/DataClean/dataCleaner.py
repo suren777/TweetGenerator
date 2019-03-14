@@ -24,6 +24,35 @@ def to_pairs(doc,splitToken='\t'):
 	pairs = [line.split(splitToken) for line in lines]
 	return pairs
 
+def clean(line):
+	re_print = re.compile('[^%s]' % re.escape(string.printable))
+	table = str.maketrans('', '', string.punctuation)
+	line = normalize('NFD', str(line)).encode('ascii', 'ignore')
+	line = line.decode('UTF-8')
+	# tokenize on white space
+	line = line.split()
+	# convert to lowercase
+	line = [word.lower() for word in line]
+	# remove punctuation from each token
+	line = [word.translate(table) for word in line]
+	# remove non-printable chars form each token
+	line = [re_print.sub('', w) for w in line]
+	# remove tokens with numbers in them
+	line = [word for word in line if word.isalpha()]
+	return ' '.join(line)
+
+
+def clean_pairs_df(df):
+	cleaned = list()
+	# prepare regex for char filtering
+	re_print = re.compile('[^%s]' % re.escape(string.printable))
+	# prepare translation table for removing punctuation
+	table = str.maketrans('', '', string.punctuation)
+	df['questions'] = df['questions'].apply(clean)
+	df['answers'] = df['answers'].apply(clean)
+	return df
+
+# store as string
 # clean a list of lines
 def clean_pairs(lines):
 	cleaned = list()
@@ -52,10 +81,7 @@ def clean_pairs(lines):
 		cleaned.append(clean_pair)
 	return array(cleaned)
 
-# save a list of clean sentences to file
-def save_clean_data(sentences, filename):
-	dump(sentences, open(filename, 'wb'))
-	print('Saved: %s' % filename)
+
 
 if __name__ == '__main__':
 	# load dataset
@@ -63,10 +89,13 @@ if __name__ == '__main__':
 	doc = pd.read_csv(dataFolder+filename)
 	# split into english-german pairs
 	#pairs = to_pairs(list(doc.values[:,1:]))
+	doc = clean_pairs_df(doc)
+	doc.to_csv(dataFolder+'question-answer.csv', index=False)
+
 	# clean sentences
-	clean_pairs = clean_pairs(list(doc.values[:,1:]))
-	# save clean pairs to file
-	save_clean_data(clean_pairs, dataFolder+'question-answer.pkl')
-	# spot check
-	for i in range(100):
-		print('[%s] => [%s]' % (clean_pairs[i,0][:], clean_pairs[i,1][:]))
+	# clean_pairs = clean_pairs(list(doc.values[:,1:]))
+	# # save clean pairs to file
+	# save_clean_data(clean_pairs, dataFolder+'question-answer.pkl')
+	# # spot check
+	# for i in range(100):
+	# 	print('[%s] => [%s]' % (clean_pairs[i,0][:], clean_pairs[i,1][:]))

@@ -1,6 +1,10 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 from CODE.ANN.modelInference import reply_model
+from CODE.ANN.model import DialogueModel
+
+filename = 'FILES/SavedModels/model-train.hdf5'
+tfmodel = DialogueModel(location=filename)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
@@ -30,10 +34,7 @@ def handle_question(json, methods=['GET', 'POST']):
 def handle_bot_reply(json, methods=['GET', 'POST']):
     print('received bot listens: ' + str(json))
     json['msg_username'] = 'Bot'
-    newMessage = reply_model([json['message']])
-    # import time
-    # time.sleep(2)
-    # newMessage = 'Test'
+    newMessage = reply_model(json['message'], tfmodel)
     json['message'] = newMessage
     socketio.emit('bot replies', json, callback=messageSent())
 

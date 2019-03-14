@@ -1,17 +1,12 @@
-from CODE.features.utils import  *
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import load_model
+from CODE.features.utils import *
+import tensorflow.keras as kf
 from nltk.translate.bleu_score import corpus_bleu
 from FILES.Config.config import *
+import pandas as pd
+from CODE.ANN.model import DialogueModel
+from tensorflow.keras import backend
 
 
-# encode and pad sequences
-def encode_sequences(tokenizer, length, lines):
-	# integer encode sequences
-	X = tokenizer.texts_to_sequences(lines)
-	# pad sequences with 0 values
-	X = pad_sequences(X, maxlen=length, padding='post')
-	return X
 
 # map an integer to a word
 def word_for_id(integer, tokenizer):
@@ -50,42 +45,61 @@ def evaluate_model(model, tokenizer, sources, raw_dataset):
 	print('BLEU-3: %f' % corpus_bleu(actual, predicted, weights=(0.3, 0.3, 0.3, 0)))
 	print('BLEU-4: %f' % corpus_bleu(actual, predicted, weights=(0.25, 0.25, 0.25, 0.25)))
 
-def reply_model(source):
-	tokenizer = get_tokenizer()
-	encodedSequence = encode_sequences(tokenizer,  MAX_QUESTION_SIZE, source)
-	modelFolder = 'FILES/SavedModels/'
-	import os
-	modelFile = os.listdir(modelFolder)[-1]
-	model = load_model(modelFolder+modelFile)
-	encodedSequence = encodedSequence[0].reshape((1, encodedSequence[0].shape[0]))
-	return predict_sequence(model, tokenizer, encodedSequence)
+def reply_model(source, model):
 
+	tokenizer = get_char_tokenizer()
+	modelDecode = model.getDecoderModel()
+	modelEncode = model.getEncoderModel()
+
+	return decode_seq(source, modelEncode, modelDecode, tokenizer)
+
+
+def decode_seq(inp_seq, encoder_model_inf, decoder_model_inf, tokenizer):
+	# Initial states value is coming from the encoder
+	enc_sentence = tokenizer.sentence_to_categorical(inp_seq).reshape(1, MAX_QUESTION_SIZE, tokenizer.size)
+	backend.clear_session()
+	states_val = encoder_model_inf.predict(enc_sentence)
+	target_seq = tokenizer.create_empty_input(tokenizer.size)
+
+	translated_sent = ''
+	stop_condition = False
+
+	while not stop_condition:
+
+		decoder_out, decoder_h, decoder_c = decoder_model_inf.predict(x=[target_seq] + states_val)
+
+		max_val_index = np.argmax(decoder_out[0, -1, :])
+		sampled_fra_char = tokenizer.decode_dict[max_val_index]
+		translated_sent += sampled_fra_char
+
+		if ((sampled_fra_char == tokenizer.pad) or (len(translated_sent) > MAX_ANSWER_SIZE)):
+			stop_condition = True
+
+		target_seq = np.zeros((1, 1, tokenizer.size))
+		target_seq[0, 0, max_val_index] = 1
+
+		states_val = [decoder_h, decoder_c]
+
+	return translated_sent
 
 if __name__ == '__main__':
 	# load datasets
 	dataFolder = r"FILES/Datasets/"
-	dataset = load_clean_sentences(dataFolder+'english-german-both.pkl')
-	train = load_clean_sentences(dataFolder+'english-german-train.pkl')
-	test = load_clean_sentences(dataFolder+'english-german-test.pkl')
-
-	# prepare english tokenizer
-	eng_tokenizer = get_tokenizer(dataset[:, 0])
-	eng_vocab_size = len(eng_tokenizer.word_index) + 1
-	eng_length = max_length(dataset[:, 0])
-	# prepare german tokenizer
-	ger_tokenizer = get_tokenizer(dataset[:, 1])
-	ger_vocab_size = len(ger_tokenizer.word_index) + 1
-	ger_length = max_length(dataset[:, 1])
-	# prepare data
-	trainX = encode_sequences(ger_tokenizer, ger_length, train[:, 1])
-	testX = encode_sequences(ger_tokenizer, ger_length, test[:, 1])
+	raw_data_set = r"question-answer{0}.csv"
+	train = pd.read_csv(dataFolder + raw_data_set.format('-train'))[1:1000]
+	tokenizer = get_char_tokenizer()
 
 	# load model
-	filename = 'FILES/SavedModels/model.h5'
-	model = load_model(filename)
-	# test on some training sequences
-	print('train')
-	evaluate_model(model, eng_tokenizer, trainX, train)
-	# test on some test sequences
-	print('test')
-	evaluate_model(model, eng_tokenizer, testX, test)
+	filename = 'FILES/SavedModels/model-train.hdf5'
+	model = DialogueModel(location=filename)
+
+	modelDecode = model.getDecoderModel()
+	modelEncode = model.getEncoderModel()
+
+	for i in range(1):
+		sentence = train.values[i,0]
+		result = decode_seq(sentence, modelEncode, modelDecode, tokenizer)
+		print("Input: {}".format(sentence))
+		print("Output: {}". format(result))
+		print("Actual: {}".format(train.values[i, 1]))
+
