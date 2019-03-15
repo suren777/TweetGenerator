@@ -99,5 +99,9 @@ def new_candidate_model(tokenizer, filename, lstm_hidden=512):
 	decoder_model_inf = kf.models.Model(inputs=[decoder_input] + decoder_input_states,
 										outputs=[decoder_out] + decoder_states)
 
-	model.load_weights(filename.format('train'))
+	try:
+		model.load_weights(filename.format('train'))
+		print("Found weights, loading")
+	except:
+		print("No weights found or smth els")
 	return model, encoder_model_inf, decoder_model_inf
