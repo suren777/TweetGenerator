@@ -1,3 +1,12 @@
+# import tensorflow as tf
+# from tensorflow.keras.backend import set_session
+# config = tf.ConfigProto()
+# # config.gpu_options.allow_growth = True
+# config.gpu_options.per_process_gpu_memory_fraction = 0.5
+# config.gpu_options.visible_device_list = "0" #only the gpu 0 is allowed
+# set_session(tf.Session(config=config))
+
+
 from CODE.features.utils import  *
 import tensorflow.keras as kf
 import pandas as pd
@@ -46,25 +55,29 @@ decoder_model_inf = kf.models.Model(inputs=[decoder_input] + decoder_input_state
 
 
 
-epochs = 10000
-batch_size=2048
-dataFeed = DataFeeder(dataFolder + raw_data_set.format('-both'), batch_size, tokenizer)
-validation_set = dataFeed.genValBatch()
-for i in range(epochs):
+epochs = 1000
+internal_epochs = 1
+batch_size = 512
+dataFeed = DataFeeder(dataFolder + raw_data_set.format('-both'), batch_size*internal_epochs, tokenizer)
+validation_set = dataFeed.genValBatch(batch_size//10)
+for i in range(epochs//internal_epochs):
     X,Y = dataFeed.genTrainBatch()
     hist = model.fit(x=X,
               y=Y,
-              epochs=1,
+              epochs=internal_epochs,
               batch_size=batch_size,
               validation_data = validation_set,
               verbose=0)
 
     if i > 0:
+        if hist.history['val_loss'][0] <= 0:
+            print("Overflow issue -- Terminating")
+            break
         if hist.history['val_loss'][0] < val_loss and hist.history['val_loss'][0] > 0:
             val_loss = hist.history['val_loss'][0]
             model.save(filename.format('train'))
             encoder_model_inf.save(filename.format('encode'))
             decoder_model_inf.save(filename.format('decode'))
-            print("New best val_loss:{0} \t on epoch: {1}".format(val_loss,i))
+            print("New best val_loss:{0} \t on epoch: {1}".format(val_loss, i*internal_epochs))
     else:
         val_loss = hist.history['val_loss'][0]
