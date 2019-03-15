@@ -3,8 +3,8 @@ from nltk.translate.bleu_score import corpus_bleu
 from FILES.Config.config import *
 import pandas as pd
 #from CODE.ANN.model import DialogueModel
-from tensorflow.keras.models import load_model
-
+#from tensorflow.keras.models import load_model
+from CODE.ANN.model import new_candidate_model
 
 # map an integer to a word
 def word_for_id(integer, tokenizer):
@@ -54,8 +54,8 @@ def decode_seq(inp_seq):
 	# Initial states value is coming from the encoder
 	tokenizer = get_char_tokenizer()
 	filename = 'FILES/SavedModels/model-{}.hdf5'
-	encoder = load_model(filename.format('encode'))
-	decoder = load_model(filename.format('decode'))
+	_, encoder, decoder = new_candidate_model(tokenizer, filename)
+
 	enc_sentence = tokenizer.encode_input_sequences(inp_seq)
 	states_val = encoder.predict(enc_sentence)
 	target_seq = tokenizer.create_empty_input_ch()

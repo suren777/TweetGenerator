@@ -1,7 +1,6 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 from CODE.ANN.modelInference import reply_model
-from CODE.ANN.model import DialogueModel
 
 
 app = Flask(__name__)
