@@ -1,5 +1,23 @@
 import tensorflow.keras as kf
 from FILES.Config.config import *
+import tensorflow.keras.backend as K
+
+# def custom_loss(yTrue,yPred):
+#
+# 	def
+
+def create_embedding_layer(tokenizer):
+	import numpy as np
+	embedding_index = tokenizer.encode_dict
+	embedding_matrix = np.zeros((tokenizer.size + 1, tokenizer.size), dtype='float32')
+	for w, i in embedding_index.items():
+		embedding_matrix[i,embedding_index[w]]=1.0
+	from tensorflow.keras.layers import Embedding
+	return Embedding(tokenizer.size + 1,
+								tokenizer.size,
+								weights=[embedding_matrix],
+								input_length=MAX_QUESTION_SIZE,
+								trainable=False)
 
 
 def vanilla_model(src_vocab, src_timesteps, tar_timesteps, n_units):

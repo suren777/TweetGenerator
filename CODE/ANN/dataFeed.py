@@ -9,6 +9,12 @@ class DataFeeder():
         self.datasetSize = pd.read_csv(self.dataLocation).shape[0]
         self.maxskips = self.datasetSize // self.batchSize
 
+    def preprocess_data(self, data):
+        Xi = self.tokenizer.encode_input_sequences(data.values[:, 0])
+        Yi = self.tokenizer.encode_output_sequences(data.values[:, 1])
+        Yo = self.tokenizer.encode_output_sequences(data.values[:, 1], pad=False)
+        Yo = self.tokenizer.to_categorical_sequences(Yo)
+        return [Xi, Yi], Yo
 
     def genTrainBatch(self):
         data = pd.read_csv(self.dataLocation, skiprows=self.batchSize*self.nskips, nrows=self.batchSize)
@@ -17,20 +23,9 @@ class DataFeeder():
         else:
             self.nskips = 0
 
-        Xi = self.tokenizer.sentences_to_categorical_seq(data.values[:, 0])
-        Yi = self.tokenizer.encode_output_sequences(data.values[:, 1])
-        Yi = self.tokenizer.to_categorical_sequences(Yi)
-        Yo = self.tokenizer.encode_output_sequences(data.values[:, 1], pad=False)
-        Yo =self.tokenizer.to_categorical_sequences(Yo)
-        return [Xi, Yi], Yo
+        return self.preprocess_data(data)
 
-    def genValBatch(self,size):
-        data = pd.read_csv(self.dataLocation, skiprows=self.batchSize*(self.maxskips-1), nrows=size)
-
-        Xi = self.tokenizer.sentences_to_categorical_seq(data.values[:, 0])
-        Yi = self.tokenizer.encode_output_sequences(data.values[:, 1])
-        Yi = self.tokenizer.to_categorical_sequences(Yi)
-        Yo = self.tokenizer.encode_output_sequences(data.values[:, 1], pad=False)
-        Yo =self.tokenizer.to_categorical_sequences(Yo)
-        return [Xi, Yi], Yo
-
+    def genValBatch(self, size):
+        return self.preprocess_data(pd.read_csv(self.dataLocation,
+                                                skiprows=self.batchSize*(self.maxskips-1),
+                                                nrows=size))

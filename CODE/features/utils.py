@@ -53,7 +53,8 @@ class Tokenizer():
         self.characters = list(set(unique for charlist in dataset for unique in str(charlist)))
         self.pad = '<pad>'
         self.eos = '</s>'
-        self.characters += [self.pad, self.eos]
+        self.characters = [self.pad, self.eos]
+        self.characters += list(set(unique for charlist in dataset for unique in str(charlist)))
         self.size = len(self.characters)
         self.encode_dict = dict()
         self.decode_dict = dict()
@@ -92,7 +93,8 @@ class Tokenizer():
     def to_categorical(self, sentence):
         res = np.zeros((sentence.shape[0], self.size))
         for i, k in enumerate(sentence):
-            res[i, int(k)] = 1
+            if k!=0:
+                res[i, int(k)] = 1
         return res
 
     def to_categorical_sequences(self, sequences):
@@ -102,6 +104,9 @@ class Tokenizer():
         res = np.zeros((1,1,size))
         res[0,0,self.encode_dict[self.eos]]=1
         return res
+
+    def create_empty_input_ch(self):
+        return self.encode_dict[self.eos]
 
     def from_categorical(self, word):
         return np.argmax(word)

@@ -2,7 +2,7 @@ from CODE.features.utils import *
 from nltk.translate.bleu_score import corpus_bleu
 from FILES.Config.config import *
 import pandas as pd
-from CODE.ANN.model import DialogueModel
+#from CODE.ANN.model import DialogueModel
 from tensorflow.keras.models import load_model
 
 
@@ -43,32 +43,30 @@ def evaluate_model(model, tokenizer, sources, raw_dataset):
 	print('BLEU-3: %f' % corpus_bleu(actual, predicted, weights=(0.3, 0.3, 0.3, 0)))
 	print('BLEU-4: %f' % corpus_bleu(actual, predicted, weights=(0.25, 0.25, 0.25, 0.25)))
 
-def reply_model(source, file):
-
-	tokenizer = get_char_tokenizer()
-
-	return decode_seq(source, file, tokenizer)
+def reply_model(source):
 
 
-def decode_seq(inp_seq, file, tokenizer):
+
+	return decode_seq(source)
+
+
+def decode_seq(inp_seq):
 	# Initial states value is coming from the encoder
-	encoder = load_model(file.format('encode'))
-	decoder = load_model(file.format('decode'))
-	enc_sentence = tokenizer.sentence_to_categorical(inp_seq).reshape(1, MAX_QUESTION_SIZE, tokenizer.size)
+	tokenizer = get_char_tokenizer()
+	filename = 'FILES/SavedModels/model-{}.hdf5'
+	encoder = load_model(filename.format('encode'))
+	decoder = load_model(filename.format('decode'))
+	enc_sentence = tokenizer.encode_input_sequences(inp_seq)
 	states_val = encoder.predict(enc_sentence)
-	target_seq = tokenizer.create_empty_input(tokenizer.size)
+	target_seq = tokenizer.create_empty_input_ch()
 
 	translated_sent = ''
 
 	for _ in range(MAX_ANSWER_SIZE):
-		decoder_out, decoder_h, decoder_c = decoder.predict(x=[target_seq] + states_val)
-		max_val_index = np.argmax(decoder_out[0, -1, :])
-		sampled_fra_char = tokenizer.decode_dict[max_val_index]
+		decoder_out, decoder_h, decoder_c = decoder.predict(x=[[target_seq]] + states_val)
+		target_seq = np.argmax(decoder_out[0, -1, :])
+		sampled_fra_char = tokenizer.decode_dict[target_seq]
 		translated_sent += sampled_fra_char
-
-
-		target_seq = np.zeros((1, 1, tokenizer.size))
-		target_seq[0, 0, max_val_index] = 1
 
 		states_val = [decoder_h, decoder_c]
 
@@ -79,7 +77,6 @@ if __name__ == '__main__':
 	dataFolder = r"FILES/Datasets/"
 	raw_data_set = r"question-answer{0}.csv"
 	train = pd.read_csv(dataFolder + raw_data_set.format('-train'))[1:1000]
-	tokenizer = get_char_tokenizer()
 
 	# load model
 	filename = 'FILES/SavedModels/model-{}.hdf5'
@@ -87,7 +84,7 @@ if __name__ == '__main__':
 
 	for i in range(10):
 		sentence = train.values[i, 0]
-		result = decode_seq(sentence, filename, tokenizer)
+		result = decode_seq(sentence)
 		print("Input: {}".format(sentence))
 		print("Output: {}". format(result))
 		print("Actual: {}".format(train.values[i, 1]))
