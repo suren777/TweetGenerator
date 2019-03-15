@@ -43,11 +43,6 @@ def clean(line):
 
 
 def clean_pairs_df(df):
-	cleaned = list()
-	# prepare regex for char filtering
-	re_print = re.compile('[^%s]' % re.escape(string.printable))
-	# prepare translation table for removing punctuation
-	table = str.maketrans('', '', string.punctuation)
 	df['questions'] = df['questions'].apply(clean)
 	df['answers'] = df['answers'].apply(clean)
 	return df

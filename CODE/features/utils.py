@@ -64,8 +64,8 @@ class Tokenizer():
     def encode_input(self, sentence):
         res = np.ones((MAX_QUESTION_SIZE))*self.encode_dict[self.pad]
         res[-1] = self.encode_dict[self.eos]
-        l = min(len(str(sentence)), MAX_QUESTION_SIZE)
-        res[-l:-1] = [self.encode_dict[s] for s in str(sentence)[:l-1]]
+        max_len = min(len(str(sentence)), MAX_QUESTION_SIZE-1)
+        res[-max_len-1:-1] = [self.encode_dict[s] for s in str(sentence)[:max_len]]
         return res
 
     def encode_input_sequences(self, sequences):
