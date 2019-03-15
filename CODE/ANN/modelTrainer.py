@@ -1,9 +1,7 @@
 from CODE.features.utils import  *
-import tensorflow.keras as kf
 import pandas as pd
 from CODE.ANN.dataFeed import DataFeeder
-from CODE.ANN.model import create_embedding_layer, new_candidate_model
-from CODE.ANN.modelInference import decode_seq
+from CODE.ANN.model import new_candidate_model
 
 raw_data_set = r"question-answer{0}.csv"
 
@@ -13,10 +11,10 @@ tokenizer = get_char_tokenizer(dataset=dataset.values.flatten())
 del dataset
 filename = 'FILES/SavedModels/model-{}.hdf5'
 
-model, _, _ = new_candidate_model(tokenizer, filename)
-epochs = 10
+model, encoder, decoder = new_candidate_model(tokenizer, filename)
+epochs = 10000
 internal_epochs = 1
-batch_size = 512
+batch_size = 1024
 dataFeed = DataFeeder(dataFolder + raw_data_set.format('-both'), batch_size*internal_epochs, tokenizer)
 dataFeed.nskips = np.random.randint(low=0, high=dataFeed.maxskips)
 validation_set = dataFeed.genValBatch(batch_size//10)
@@ -40,9 +38,19 @@ for i in range(epochs//internal_epochs):
             print("New best val_loss:{0} \t on epoch: {1}".format(val_loss, i*internal_epochs))
             count+=1
             if count == 10:
-                test_seq = pd.read_csv(dataFolder + raw_data_set.format('-train'))[:1]
+                test_seq = pd.read_csv(dataFolder + raw_data_set.format('-both'))[:1]
+                enc_sentence = tokenizer.encode_input_sequences(test_seq)
+                states_val = encoder.predict(enc_sentence)
+                target_seq = tokenizer.create_empty_input_ch()
+                result = ''
+                for _ in range(MAX_ANSWER_SIZE):
+                    decoder_out, decoder_h, decoder_c = decoder.predict(x=[[target_seq]] + states_val)
+                    target_seq = np.argmax(decoder_out[0, -1, :])
+                    result += tokenizer.decode_dict[target_seq]
+                    states_val = [decoder_h, decoder_c]
+
                 print("Input: {}".format(test_seq.values[0, 0]))
-                print("Output: {}".format(decode_seq(test_seq)))
+                print("Output: {}".format(result))
                 print("Actual: {}".format(test_seq.values[0, 1]))
                 count = 0
     else:

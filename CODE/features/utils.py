@@ -9,8 +9,6 @@ dataFolder = r"FILES/Datasets/"
 def load_clean_sentences(filename):
     return load(open(filename, 'rb'))
 
-
-
 def get_char_tokenizer(dataset=None, tokenizerFile='tokenizer_char.pkl'):
     try:
         with open(dataFolder+tokenizerFile, 'rb') as f:
@@ -29,19 +27,6 @@ def get_char_tokenizer(dataset=None, tokenizerFile='tokenizer_char.pkl'):
 # max sentence length
 def max_length(lines):
     return max(len(line.split()) for line in lines)
-
-
-
-
-
-
-# map an integer to a word
-def word_for_id(integer, tokenizer):
-    for word, index in tokenizer.word_index.items():
-        if index == integer:
-            return word
-    return None
-
 
 # save a list of clean sentences to file
 def save_clean_data(sentences, filename):
