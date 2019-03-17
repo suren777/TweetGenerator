@@ -1,5 +1,6 @@
 *.pyc
 *.pkl
 venv/
+venvp37t2/
 .idea/
 .vscode/

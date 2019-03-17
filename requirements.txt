@@ -1,6 +1,7 @@
 flask
 flask-socketio
-tensorflow
+#tensorflow
 pandas
 nltk
 sklearn
+tqdm
