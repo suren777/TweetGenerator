@@ -42,11 +42,11 @@ for i in tqdm(range(epochs//internal_epochs)):
             print('Loss is NaN: breaking')
             break
         if hist.history['val_loss'][-1] < val_loss and hist.history['val_loss'][-1] > 0:
-            val_loss = hist.history['val_loss'][0]
+            val_loss = hist.history['val_loss'][-1]
             model.save_weights(filename.format('train'))
             print("\n\tNew best val_loss:{0} \t on epoch: {1} ".format(val_loss, i*internal_epochs))
             count+=1
-            if count == 5:
+            if count == 1:
                 id = np.random.randint(0, 99)
                 test_seq = pd.read_csv(dataFolder + raw_data_set.format('-both'))[:100]
                 enc_sentence = tokenizer.encode_input_sequences(test_seq.values[id,0])
