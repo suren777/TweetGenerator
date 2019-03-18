@@ -16,9 +16,9 @@ del dataset
 filename = 'FILES/SavedModels/model-{}.hdf5'
 
 epochs = 100000
-internal_epochs = 4
+internal_epochs = 10
 batch_size = 512
-dataFeed = DataFeeder(dataFolder + raw_data_set.format('-both'), batch_size*internal_epochs, tokenizer)
+dataFeed = DataFeeder(dataFolder + raw_data_set.format('-both'), batch_size*4, tokenizer)
 dataFeed.nskips = np.random.randint(low=0, high=dataFeed.maxskips)
 validation_set = dataFeed.genValBatch(batch_size//10)
 count = 0
@@ -32,11 +32,14 @@ for i in tqdm(range(epochs//internal_epochs)):
               epochs=internal_epochs,
               batch_size=batch_size,
               validation_data = validation_set,
-              verbose=1)
+              verbose=2)
 
     if i > 0:
         if hist.history['val_loss'][-1] <= 0:
             print("Overflow issue -- Terminating")
+            break
+        if np.isnan( hist.history['val_loss'][-1] ):
+            print('Loss is NaN: breaking')
             break
         if hist.history['val_loss'][-1] < val_loss and hist.history['val_loss'][-1] > 0:
             val_loss = hist.history['val_loss'][0]
@@ -66,5 +69,5 @@ for i in tqdm(range(epochs//internal_epochs)):
                 print('\n' + " ".join([' - + '] * 10))
                 count = 0
     else:
-        val_loss = hist.history['val_loss'][0]
+        val_loss = hist.history['val_loss'][-1]
 
