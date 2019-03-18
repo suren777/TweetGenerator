@@ -24,8 +24,9 @@ def decode_seq(inp_seq):
 	for _ in range(MAX_ANSWER_SIZE):
 		decoder_out, decoder_h, decoder_c = decoder.predict(x=[[target_seq]] + states_val)
 		target_seq = np.argmax(decoder_out[0, -1, :])
+		if target_seq == tokenizer.encode_dict[tokenizer.esc]:
+			break
 		message += [tokenizer.decode_dict[target_seq]]
-
 		states_val = [decoder_h, decoder_c]
 
 	return (' ').join(message)

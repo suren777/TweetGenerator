@@ -6,7 +6,8 @@ class Tokenizer():
         self.pad = '<pad>'
         self.unk = '<unk>'
         self.eos = '</s>'
-        self.items = [self.pad, self.eos, self.unk]
+        self.esc = '<s>'
+        self.items = [self.pad, self.eos, self.unk, self.esc]
         self.type = type
         if type == 'char':
             self.items += list(set(unique for charlist in dataset for unique in str(charlist)))
@@ -41,15 +42,16 @@ class Tokenizer():
     def encode_output(self, sentence, pad=True):
         if self.type == 'word':
             sentence = str(sentence).split()
-            max_len = min(len(sentence), MAX_QUESTION_SIZE - 1)
+            max_len = min(len(sentence), MAX_ANSWER_SIZE - 1)
         else:
-            max_len = min(len(str(sentence)), MAX_QUESTION_SIZE - 1)
-        res = np.ones((MAX_QUESTION_SIZE)) * self.encode_dict[self.pad]
+            max_len = min(len(str(sentence)), MAX_ANSWER_SIZE - 1)
+        res = np.ones((MAX_ANSWER_SIZE)) * self.encode_dict[self.pad]
         if pad:
             res[0] = self.encode_dict[self.eos]
             res[1:max_len] = [self.encode_dict.get(s, self.encode_dict[self.unk]) for s in str(sentence)[0:max_len-1]]
         else:
             res[0:max_len] = [self.encode_dict.get(s, self.encode_dict[self.unk]) for s in str(sentence)[0:max_len]]
+            res[max_len] = self.encode_dict[self.esc]
         return res
 
     def encode_output_sequences(self, sequences, pad=True):
