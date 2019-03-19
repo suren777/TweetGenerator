@@ -35,21 +35,22 @@ for i in tqdm(range(epochs//internal_epochs)):
               verbose=2)
 
     if i > 0:
-        if hist.history['val_loss'][-1] <= 0:
+        if hist.history['val_loss'][-1] <= 1e-2:
             print("Overflow issue -- Terminating")
             break
         if np.isnan( hist.history['val_loss'][-1] ):
             print('Loss is NaN: breaking')
             break
-        if hist.history['val_loss'][-1] < val_loss and hist.history['val_loss'][-1] > 0:
-            val_loss = hist.history['val_loss'][-1]
+        avg_val_loss = sum(hist.history['val_loss']) / float(len(hist.history['val_loss']))
+        if avg_val_loss < val_loss and hist.history['val_loss'][-1] > 0:
+            val_loss = avg_val_loss
             model.save_weights(filename.format('train'))
-            print("\n\tNew best val_loss:{0} \t on epoch: {1} ".format(val_loss, i*internal_epochs))
+            print("\n\tNew best avg_val_loss:{0} \t on epoch: {1} ".format(avg_val_loss, i*internal_epochs))
             count+=1
             if count == 1:
                 id = np.random.randint(0, 99)
-                test_seq = pd.read_csv(dataFolder + raw_data_set.format('-both'))[:100]
-                enc_sentence = tokenizer.encode_input_sequences(test_seq.values[id,0])
+                test_seq = pd.read_csv(dataFolder + raw_data_set.format('-both-cache'))[:100]
+                enc_sentence = tokenizer.encode_input_sequences(test_seq.values[id, 0])
                 states_val = encoder.predict(enc_sentence)
                 target_seq = tokenizer.create_empty_input_ch()
                 result = []
@@ -69,5 +70,5 @@ for i in tqdm(range(epochs//internal_epochs)):
                 print('\n' + " ".join([' - + '] * 10))
                 count = 0
     else:
-        val_loss = hist.history['val_loss'][-1]
+        val_loss = sum(hist.history['val_loss']) / float(len(hist.history['val_loss']))
 

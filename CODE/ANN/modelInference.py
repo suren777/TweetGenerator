@@ -35,7 +35,7 @@ if __name__ == '__main__':
 	# load datasets
 	dataFolder = r"FILES/Datasets/"
 	raw_data_set = r"question-answer{0}.csv"
-	train = pd.read_csv(dataFolder + raw_data_set.format('-both'))[:100]
+	train = pd.read_csv(dataFolder + raw_data_set.format('-both-cache'))[:100]
 
 	# load model
 	filename = 'FILES/SavedModels/model-{}.hdf5'
