@@ -103,11 +103,16 @@ def new_candidate_model(tokenizer, filename, lstm_hidden=512):
 	decoder_out, _, _ = decoder_LSTM(decoder_embed_input, initial_state=encoder_states)
 	decoder_dense = kf.layers.Dense(MAX_VOCAB_SIZE+4, activation='softmax', kernel_regularizer=kf.regularizers.l2(0.01),
 									activity_regularizer=kf.regularizers.l1(0.01))
-	normalize = kf.layers.BatchNormalization()(decoder_dense(decoder_out))
 
-	model = kf.models.Model(inputs=[encoder_input, decoder_input], outputs=[normalize])
+	# decoder_dense = kf.layers.Dense(MAX_VOCAB_SIZE + 4, use_bias=False)
+	# normalize = kf.layers.BatchNormalization()(decoder_dense(decoder_out))
+	# final = kf.layers.Activation('softmax')(normalize)
+	# model = kf.models.Model(inputs=[encoder_input, decoder_input], outputs=[final])
+
+	model = kf.models.Model(inputs=[encoder_input, decoder_input], outputs=[decoder_dense(decoder_out)])
 
 	optimizer = kf.optimizers.RMSprop(lr=0.001, clipnorm=5)
+	#optimizer = kf.optimizers.RMSprop(lr=0.001 )
 
 	weights = np.ones((MAX_VOCAB_SIZE+4))
 	weights[0:3] = 0
