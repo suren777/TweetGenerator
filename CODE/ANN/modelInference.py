@@ -23,7 +23,7 @@ def decode_seq(inp_seq):
 
 	for _ in range(MAX_ANSWER_SIZE):
 		decoder_out, decoder_h, decoder_c = decoder.predict(x=[[target_seq]] + states_val)
-		target_seq = np.argmax(decoder_out[0, -1, :])
+		target_seq = np.argmax(decoder_out[0, -1, 2:])+2
 		if target_seq == tokenizer.encode_dict[tokenizer.esc]:
 			break
 		message += [tokenizer.decode_dict[target_seq]]
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
 
 	for i in range(10):
-		sentence = train.values[i, 0]
+		sentence = [train.values[i, 0]]
 		result = decode_seq(sentence)
 		print(" ".join([' - + ']*10))
 		print("Input: {}".format(sentence))

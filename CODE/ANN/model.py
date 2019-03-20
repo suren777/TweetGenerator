@@ -112,10 +112,10 @@ def new_candidate_model(tokenizer, filename, lstm_hidden=512):
 	model = kf.models.Model(inputs=[encoder_input, decoder_input], outputs=[decoder_dense(decoder_out)])
 
 	optimizer = kf.optimizers.RMSprop(lr=0.001, clipnorm=5)
-	#optimizer = kf.optimizers.RMSprop(lr=0.001 )
+	# optimizer = kf.optimizers.RMSprop(lr=0.001 )
 
 	weights = np.ones((MAX_VOCAB_SIZE+4))
-	weights[0:3] = 0
+	weights[0:2] = 0
 	model.compile(optimizer=optimizer, loss=weighted_categorical_crossentropy(weights))
 
 	encoder_model_inf = kf.models.Model(encoder_input, encoder_states)

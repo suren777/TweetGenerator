@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from CODE.Config.config import *
 
 class DataFeeder():
     def __init__(self, fileLoc, batchSize, tokenizer, max_freq = 3):
@@ -17,11 +18,13 @@ class DataFeeder():
     def clean_unk(self):
         df = pd.read_csv(self.dataLocation)
         from collections import Counter
-        index = list()
+        index = set()
         for row in df.iterrows():
             if Counter(self.tokenizer.encode_input(row[1][1])).get(2.0,0)>=self.max_freq :
-                index.append(row[0])
-        df.loc[index,:].to_csv(self.cacheLocation, index=False)
+                index.add(row[0])
+
+
+        df.drop(list(index)).to_csv(self.cacheLocation, index=False)
 
 
     def preprocess_data(self, data):

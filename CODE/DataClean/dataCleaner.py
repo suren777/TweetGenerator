@@ -83,7 +83,7 @@ if __name__ == '__main__':
 	doc = pd.read_csv(dataFolder+filename)
 	# split into english-german pairs
 	#pairs = to_pairs(list(doc.values[:,1:]))
-	doc = clean_pairs_df(doc)
+	doc = clean_pairs_df(doc).dropna()
 	doc.to_csv(dataFolder+'question-answer.csv', index=False)
 
 	# clean sentences

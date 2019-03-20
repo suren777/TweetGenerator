@@ -50,13 +50,13 @@ for i in tqdm(range(epochs//internal_epochs)):
             if count == 1:
                 id = np.random.randint(0, 99)
                 test_seq = pd.read_csv(dataFolder + raw_data_set.format('-both-cache'))[:100]
-                enc_sentence = tokenizer.encode_input_sequences(test_seq.values[id, 0])
+                enc_sentence = tokenizer.encode_input_sequences([test_seq.values[id, 0]])
                 states_val = encoder.predict(enc_sentence)
                 target_seq = tokenizer.create_empty_input_ch()
                 result = []
                 for _ in range(MAX_ANSWER_SIZE):
                     decoder_out, decoder_h, decoder_c = decoder.predict(x=[[target_seq]] + states_val)
-                    target_seq = np.argmax(decoder_out[0, -1, :])
+                    target_seq = np.argmax(decoder_out[0, -1, 2:])+2
                     if target_seq == tokenizer.encode_dict[tokenizer.esc]:
                         break
                     result += [tokenizer.decode_dict[target_seq]]
